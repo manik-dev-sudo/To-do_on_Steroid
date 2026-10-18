@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To-Do on Steroids — AI Voice Taskmaster</title>
+  
+  <!-- PWA & SEO Meta Tags -->
+  <meta name="description" content="AI-Powered Voice To-Do App. Speak your day naturally. Gemini AI extracts, schedules, and marks your tasks automatically.">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="/icon.svg">
+  <link rel="apple-touch-icon" href="/icon.svg">
+  
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="brand-wrapper">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>To-Do on Steroids <span class="brand-badge">AI Voice</span></h1>
+          <div class="header-date-badge" id="header-today-date">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span id="current-date-text">Loading date...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs (3 Pages) -->
+      <nav class="nav-tabs" role="tablist">
+        <button class="nav-tab-btn active" id="tab-today" data-target="page-today" role="tab" aria-selected="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          Today
+        </button>
+        <button class="nav-tab-btn" id="tab-history" data-target="page-history" role="tab" aria-selected="false">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          History
+        </button>
+        <button class="nav-tab-btn" id="tab-settings" data-target="page-settings" role="tab" aria-selected="false">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          Settings
+        </button>
+      </nav>
+
+      <!-- Right Header Actions -->
+      <div class="header-actions">
+        <!-- PWA Install Button (automatically shows when installable) -->
+        <button id="btn-pwa-install" class="btn-install" title="Install as Desktop/Mobile App">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Install App
+        </button>
+
+        <!-- Top Right Manual Add Task Button -->
+        <button id="btn-open-manual-modal" class="btn-manual-add" title="Add task manually">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          New Task
+        </button>
+
+        <!-- AI API Status Badge -->
+        <a href="#settings" id="api-status-pill" class="api-status-badge" title="Configure Google AI Studio API Key">
+          <span class="status-dot"></span>
+          <span id="api-status-text">AI Ready</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- ======================================================================
+         PAGE 1: TODAY / VOICE AI WORKSPACE
+         ====================================================================== -->
+    <main id="page-today" class="page-view active">
+      
+      <!-- AI Voice Hero Section -->
+      <section class="voice-hero-card">
+        <div class="hero-center">
+          <div class="mic-button-wrapper">
+            <div class="mic-ring"></div>
+            <button id="btn-mic" class="mic-button" aria-label="Toggle Voice Recording" title="Tap to Speak">
+              <svg class="mic-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+              </svg>
+            </button>
+          </div>
+
+          <h2 id="mic-status-text" class="mic-status-title">Tap to Speak Your Routine & Tasks</h2>
+          <p id="mic-hint-text" class="mic-subtext">
+            Speak naturally: <span style="color: #c084fc;">"I finished my email and workout, and I need to join team meeting at 10:00 PM"</span>
+          </p>
+
+          <!-- Animated Audio Visualizer Canvas -->
+          <canvas id="visualizer-canvas" class="visualizer-canvas" width="240" height="36"></canvas>
+        </div>
+
+        <!-- Editable Speech Transcript Card -->
+        <div class="transcript-card">
+          <div class="transcript-header">
+            <span class="transcript-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+              Spoken / Typed Text (Editable)
+            </span>
+            <div class="transcript-actions-mini">
+              <button id="btn-clear-transcript" class="btn-mini-clear" title="Clear text">Clear</button>
+            </div>
+          </div> <!-- Closed transcript-header properly -->
+
+          <div id="ai-status-banner" style="display: none; padding: 0.65rem 0.95rem; border-radius: 8px; margin-bottom: 0.75rem; font-size: 0.85rem; align-items: center; justify-content: space-between; border: 1px solid transparent;">
+            <div id="ai-status-message" style="display: flex; align-items: center; gap: 0.5rem; flex: 1;"></div>
+            <button type="button" id="btn-dismiss-ai-status" style="background: transparent; border: none; color: inherit; cursor: pointer; opacity: 0.7; font-size: 1.1rem; padding: 0 0.4rem;" aria-label="Dismiss">&times;</button>
+          </div>
+
+          <textarea 
+            id="transcript-input" 
+            class="transcript-input" 
+            placeholder="Your spoken words appear here in real-time. You can also edit or type directly, then tap 'Analyze with AI'..."
+            rows="3"
+          ></textarea>
+
+          <div class="voice-action-bar">
+            <!-- Quick prompt inspiration chips -->
+            <div class="quick-prompts">
+              <span style="font-size: 0.75rem; color: var(--text-muted);">Try saying:</span>
+              <button class="prompt-chip" data-text="I completed my email and walking task, and I have a new meeting at 10:00 PM">"Completed email & walking, meeting at 10 PM"</button>
+              <button class="prompt-chip" data-text="Review budget at 2 PM and call dentist at 5:30 PM">"Budget at 2 PM & call dentist"</button>
+            </div>
+
+            <!-- AI Analyze Button -->
+            <button id="btn-ai-analyze" class="btn-ai-analyze">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+              </svg>
+              <span>Analyze with Gemini AI</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Task Lists Container -->
+      <section class="tasks-container">
+        
+        <!-- Active Tasks Header & List -->
+        <div>
+          <div class="tasks-header-row">
+            <h3 class="tasks-section-title">
+              Active Tasks
+              <span id="active-tasks-count" class="task-count-pill">0</span>
+            </h3>
+          </div>
+
+          <div id="active-tasks-list">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Completed Tasks Section (Faded & Cut text as requested) -->
+        <div class="completed-tasks-section">
+          <button id="btn-toggle-completed" class="completed-toggle-btn">
+            <svg class="completed-toggle-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+            Completed Tasks (<span id="completed-tasks-count">0</span>)
+          </button>
+
+          <div id="completed-tasks-list">
+            <!-- Rendered by JS with faded and strikethrough cut text -->
+          </div>
+        </div>
+
+      </section>
+    </main>
+
+    <!-- ======================================================================
+         PAGE 2: HISTORY & ANALYTICS
+         ====================================================================== -->
+    <section id="page-history" class="page-view">
+      
+      <!-- Stats Overview Cards -->
+      <div class="history-stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon" style="background: rgba(139, 92, 246, 0.15); color: #a855f7;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+          </div>
+          <div>
+            <div id="stat-total-tasks" class="stat-value">0</div>
+            <div class="stat-label">Total Tasks Tracked</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
+          <div>
+            <div id="stat-completed-tasks" class="stat-value">0</div>
+            <div class="stat-label">Tasks Completed</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background: rgba(6, 182, 212, 0.15); color: #06b6d4;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 20V10"></path>
+              <path d="M12 20V4"></path>
+              <path d="M6 20v-6"></path>
+            </svg>
+          </div>
+          <div>
+            <div id="stat-completion-rate" class="stat-value">0%</div>
+            <div class="stat-label">Completion Rate</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Date Filter Bar -->
+      <div class="history-filter-bar">
+        <div class="date-picker-wrap">
+          <label for="history-date-filter" style="font-size: 0.85rem; color: var(--text-secondary);">Select Date:</label>
+          <input type="date" id="history-date-filter" class="date-picker-input">
+          <button id="btn-history-show-all" class="btn-secondary" style="padding: 0.35rem 0.8rem; font-size: 0.8rem;">Show All Days</button>
+        </div>
+
+        <div>
+          <button id="btn-export-history" class="btn-secondary" style="padding: 0.4rem 0.9rem; font-size: 0.825rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px; vertical-align: middle;">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Export Backup
+          </button>
+        </div>
+      </div>
+
+      <!-- History Datewise Timeline -->
+      <div id="history-timeline-container">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         PAGE 3: SETTINGS & GEMINI CONFIG
+         ====================================================================== -->
+    <section id="page-settings" class="page-view">
+      
+      <div class="settings-section-card">
+        <div class="settings-card-header">
+          <h3 class="settings-card-title">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2">
+              <path d="M21 2l-2 2m-6 4l3 3m0 0l-9 9 4 4 9-9-4-4z"></path>
+              <circle cx="7.5" cy="16.5" r="1.5"></circle>
+            </svg>
+            Google Gemini AI Configuration
+          </h3>
+          <p class="settings-card-desc">
+            Connect your free Google AI Studio API key to power voice parsing, task extraction, and natural language status updates.
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="setting-api-key">Google AI Studio API Key</label>
+          <div class="form-input-wrap">
+            <input 
+              type="password" 
+              id="setting-api-key" 
+              class="form-input" 
+              placeholder="Paste your AI Studio API key (AIzaSy...)" 
+              autocomplete="off"
+            >
+            <button id="btn-toggle-key-visibility" class="btn-secondary" style="padding: 0 0.9rem;">Show</button>
+            <button id="btn-test-api" class="btn-primary" style="padding: 0.65rem 1.25rem;">Test Key</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <label class="form-label" for="setting-model" style="margin-bottom: 0;">Gemini Model (Free Tier)</label>
+            <button type="button" id="btn-fetch-models" class="btn-secondary" style="padding: 0.25rem 0.65rem; font-size: 0.775rem; border-color: rgba(6, 182, 212, 0.4); color: #38bdf8;">
+              🔄 Auto-Detect Models
+            </button>
+          </div>
+          <select id="setting-model" class="form-select">
+            <option value="gemini-2.5-flash" selected>gemini-2.5-flash (Recommended • Latest Free)</option>
+            <option value="gemini-2.0-flash">gemini-2.0-flash (Fast &amp; Free)</option>
+            <option value="gemini-2.0-flash-lite">gemini-2.0-flash-lite (Fastest &amp; Free)</option>
+            <option value="gemini-1.5-flash">gemini-1.5-flash (Stable Fallback)</option>
+            <option value="gemini-1.5-flash-8b">gemini-1.5-flash-8b (Lightweight)</option>
+            <option value="gemini-1.5-pro">gemini-1.5-pro (Legacy Pro)</option>
+            <option value="custom">✏️ Custom Model ID (Enter manually)...</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="custom-model-group" style="display: none;">
+          <label class="form-label" for="setting-custom-model">Custom Model Identifier</label>
+          <input 
+            type="text" 
+            id="setting-custom-model" 
+            class="form-input" 
+            placeholder="e.g. gemini-2.5-flash or models/gemini-2.5-flash"
+          >
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+            You can type or paste any valid Gemini model name supported by your Google AI Studio account.
+          </div>
+        </div>
+
+        <div class="settings-help-box">
+          <strong>Need an API Key?</strong><br>
+          1. Go to <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Google AI Studio (aistudio.google.com)</a>.<br>
+          2. Click <strong>"Create API Key"</strong> (100% free, no credit card needed).<br>
+          3. Paste it above and click <strong>"Test Key"</strong>. The app will automatically test and match the best active free model for your account.
+        </div>
+      </div>
+
+      <div class="settings-section-card">
+        <div class="settings-card-header">
+          <h3 class="settings-card-title">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            </svg>
+            Voice & Audio Preferences
+          </h3>
+          <p class="settings-card-desc">Configure speech recognition language and interactive sound effects.</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="setting-speech-lang">Speech Recognition Language</label>
+          <select id="setting-speech-lang" class="form-select">
+            <option value="en-US" selected>English (United States)</option>
+            <option value="en-GB">English (United Kingdom)</option>
+            <option value="en-IN">English (India)</option>
+            <option value="en-AU">English (Australia)</option>
+            <option value="en-CA">English (Canada)</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; margin-top: 1.5rem;">
+          <div>
+            <div style="font-weight: 600; font-size: 0.95rem;">Futuristic Sound FX</div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary);">Chimes on recording, task completions, and approvals</div>
+          </div>
+          <input type="checkbox" id="setting-sound-effects" checked style="width: 20px; height: 20px; cursor: pointer;">
+        </div>
+      </div>
+
+      <div class="settings-section-card">
+        <div class="settings-card-header">
+          <h3 class="settings-card-title" style="color: var(--accent-rose);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            Local Storage & Cache Management
+          </h3>
+          <p class="settings-card-desc">All tasks and settings are kept strictly on your local browser cache.</p>
+        </div>
+
+        <div style="display: flex; gap: 1rem; align-items: center;">
+          <button id="btn-clear-all-data" class="btn-secondary" style="border-color: rgba(244, 63, 94, 0.4); color: #fb7185;">
+            Reset & Clear All Tasks Cache
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+  </div> <!-- End .app-container -->
+
+  <!-- ========================================================================
+       MODAL 1: AI ACTION APPROVAL POP-UP COMPONENT (As Requested)
+       ======================================================================== -->
+  <div id="modal-approval" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-header-title">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2.5">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          Review AI Plan & Actions
+        </h3>
+        <button id="btn-close-approval-modal" class="modal-close-btn" aria-label="Close modal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div id="approval-ai-summary" class="ai-summary-callout">
+          <!-- AI parsed explanation -->
+        </div>
+
+        <!-- Section: New Tasks to Add -->
+        <div id="approval-group-add">
+          <h4 class="approval-group-title">
+            <span style="color: var(--accent-emerald);">➕ New Tasks to Add</span>
+            <span id="approval-add-count" class="task-count-pill">0</span>
+          </h4>
+          <div id="approval-add-list" class="approval-list">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Section: Tasks to Mark Completed -->
+        <div id="approval-group-complete">
+          <h4 class="approval-group-title">
+            <span style="color: var(--accent-rose);">✓ Tasks to Mark Complete</span>
+            <span id="approval-complete-count" class="task-count-pill">0</span>
+          </h4>
+          <div id="approval-complete-list" class="approval-list">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="btn-reject-approval" class="btn-secondary">Discard</button>
+        <button id="btn-confirm-approval" class="btn-primary">✓ Approve & Apply Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL 2: MANUAL ADD TASK MODAL (Top Right Corner Button)
+       ======================================================================== -->
+  <div id="modal-manual-task" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-content" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 class="modal-header-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Add Task Manually
+        </h3>
+        <button id="btn-close-manual-modal" class="modal-close-btn" aria-label="Close modal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="form-manual-task" class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="manual-task-title">Task Title *</label>
+          <input type="text" id="manual-task-title" class="form-input" placeholder="e.g. Call Alex about contract" required>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label" for="manual-task-time">Scheduled Time</label>
+            <input type="time" id="manual-task-time" class="form-input">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="manual-task-date">Date</label>
+            <input type="date" id="manual-task-date" class="form-input">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label" for="manual-task-category">Category</label>
+            <select id="manual-task-category" class="form-select">
+              <option value="Work">💼 Work</option>
+              <option value="Personal">🏠 Personal</option>
+              <option value="Health">🏃 Health / Fitness</option>
+              <option value="Meeting">📅 Meeting</option>
+              <option value="Routine">🔄 Routine</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="manual-task-priority">Priority</label>
+            <select id="manual-task-priority" class="form-select">
+              <option value="medium" selected>Medium</option>
+              <option value="high">🔥 High</option>
+              <option value="low">🌱 Low</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="padding: 0; margin-top: 1rem; border: none;">
+          <button type="button" id="btn-cancel-manual" class="btn-secondary">Cancel</button>
+          <button type="submit" class="btn-primary">Add Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Application Logic -->
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
